@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-ms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecommerce-ms
+  template:
+    metadata:
+      labels:
+        app: ecommerce-ms
+    spec:
+      # affinity:
+      #   nodeAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       nodeSelectorTerms:
+      #         - matchExpressions:
+      #             - key: role
+      #               operator: In
+      #               values:
+      #                 - front
+      imagePullSecrets:
+      - name: registryaws
+      containers:
+      - name: ecommerce-ms
+        image: 318518286440.dkr.ecr.us-east-1.amazonaws.com/produccion/ecommerce-ms:v1.0.2
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: prd
+        - name: JAVA_OPTS
+          value: -Xms256M -Xmx768M -XX:NewSize=134m -XX:MaxNewSize=280m -XX:+CMSParallelRemarkEnabled -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -Duser.timezone=America/Argentina/Buenos_Aires
+        - name: TZ
+          value: America/Argentina/Buenos_Aires
+        resources:
+          requests:
+            memory: "256M"
+            cpu: "200m"
+          limits:
+            memory: "768M"
+            cpu: "700m"
+        ports:
+        - containerPort: 8450
+      #   volumeMounts:
+      #   - name: ecommerce-ms-logs
+      #     mountPath: /logs
+      #   - name: tz-config
+      #     mountPath: /etc/localtime
+      # volumes:
+      #  - name: ecommerce-ms-logs
+      #    hostPath:
+      #      path: /home/dockeruser/kubernetes/logs
+      #      type: Directory
+      #  - name: tz-config
+      #    hostPath:
+      #      path: /usr/share/zoneinfo/America/Argentina/Buenos_Aires
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce-ms-service
+spec:
+  type: NodePort
+  selector:
+    app: ecommerce-ms
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 8450
+    nodePort: 30450
+
