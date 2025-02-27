@@ -8,8 +8,8 @@ pipeline {
     environment {
         ECR_REPO = '318518286440.dkr.ecr.us-east-1.amazonaws.com'
         SOURCE_REPO = 'srvregistry01.caredmegatone.com'
-        IMAGE_NAME = 'nombre_de_tu_imagen'
-        IMAGE_TAG = 'tag_de_tu_imagen'
+        IMAGE_NAME = 'tecnologia/jenkinsk8s'
+        IMAGE_TAG = 'v1.0'
     }
     stages {
         stage('Login ECR') {
