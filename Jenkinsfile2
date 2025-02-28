@@ -11,6 +11,9 @@ pipeline {
         IMAGE_NAME = 'tecnologia/jenkinsk8s'
         IMAGE_TAG = 'v1.0'
         DOCKER_REGISTRY_CRED = credentials('harbor')
+        // Entorno de Kubernetes
+        KUBECONFIG_CREDENTIAL_ID = 'kubeconfig'
+        NAMESPACE = 'default'
     }
     stages {
         stage('Install AWS CLI') {
@@ -47,6 +50,28 @@ pipeline {
         stage('Push Image to ECR') {
             steps {
                 sh "docker push $ECR_REPO/$IMAGE_NAME:$IMAGE_TAG"
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL_ID}", variable: 'KUBECONFIG')]) {
+                    sh '''
+                    # Crear una copia del archivo de despliegue para modificarlo
+                    cp ${DEPLOYMENT_FILE} deployment-temp.yaml
+                    
+                    # Extraer el nombre del deployment del archivo
+                    DEPLOYMENT_NAME=$(grep -A1 "kind: Deployment" deployment-temp.yaml | grep "name:" | awk '{print $2}')
+                    
+                    # Reemplazar la imagen en el archivo
+                    sed -i "s|image:.*|image: ${ECR_REPO}/${IMAGE_NAME}:${IMAGE_TAG}|g" deployment-temp.yaml
+                    
+                    # Aplicar el archivo de despliegue
+                    kubectl --kubeconfig=$KUBECONFIG apply -f deployment-temp.yaml -n ${NAMESPACE}
+                    
+                    # Esperar a que el despliegue se complete
+                    kubectl --kubeconfig=$KUBECONFIG -n ${NAMESPACE} rollout status deployment/${DEPLOYMENT_NAME}
+                    '''
+                }
             }
         }
         stage('Cleanup') {
