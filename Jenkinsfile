@@ -112,8 +112,8 @@ pipeline {
         stage('Cleanup') {
             steps {
                 // Hacer logout de los registros por seguridad
-                sh 'docker logout $SOURCE_REPO'
-                sh 'docker logout $ECR_REPO'
+                sh 'docker logout $SOURCE_REPO || true'
+                sh 'docker logout $ECR_REPO || true'
                 // Limpieza de archivos temporales
                 sh 'rm -f deployment-temp.yaml || true'
             }
