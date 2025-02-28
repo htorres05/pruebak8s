@@ -75,24 +75,7 @@ pipeline {
                 withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL_ID}", variable: 'KUBECONFIG')]) {
                     sh '''#!/bin/bash
                     set -e
-                    
-                    # Verificar que el archivo existe
-                    ls -la ${DEPLOYMENT_FILE}
-                    
-                    # Crear una copia del archivo de despliegue para modificarlo
-                    cp ${DEPLOYMENT_FILE} deployment-temp.yaml
-                    
-                    # Verificar contenido del archivo
-                    echo "Contenido del archivo deployment-temp.yaml:"
-                    cat deployment-temp.yaml
-                    
-                    # Extraer el nombre del deployment del archivo - usar una forma más robusta
-                    DEPLOYMENT_NAME=$(grep -A2 "kind: Deployment" deployment-temp.yaml | grep "name:" | head -1 | awk '{print $2}')
-                    echo "Nombre del deployment: ${DEPLOYMENT_NAME}"
-                    
-                    # Reemplazar la imagen en el archivo
-                    sed -i "s|image:.*|image: ${ECR_REPO}/${IMAGE_NAME}:${IMAGE_TAG}|g" deployment-temp.yaml
-                    
+                
                     # Verificar que kubectl está instalado
                     which ${KUBECTL}
                     
@@ -100,15 +83,8 @@ pipeline {
                     TEMP_DIR=$(mktemp -d)
                     cp "$KUBECONFIG" $TEMP_DIR/config
                     
-                    # Aplicar el archivo de despliegue usando el kubeconfig en el directorio temporal
-                    KUBECONFIG=$TEMP_DIR/config ${KUBECTL} apply -f deployment-temp.yaml -n ${NAMESPACE}
-                    
-                    # Si el deployment existe, esperar a que se complete
-                    if [ ! -z "${DEPLOYMENT_NAME}" ]; then
-                        KUBECONFIG=$TEMP_DIR/config ${KUBECTL} rollout status deployment/${DEPLOYMENT_NAME} -n ${NAMESPACE}
-                    else
-                        echo "No se pudo extraer el nombre del deployment, no se esperará el rollout"
-                    fi
+                    # Ejecutar kubectl get pod
+                    KUBECONFIG=$TEMP_DIR/config ${KUBECTL} get pod -n ${NAMESPACE}
                     
                     # Limpiar directorio temporal
                     rm -rf $TEMP_DIR
