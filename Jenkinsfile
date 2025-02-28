@@ -72,7 +72,10 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL_ID}", variable: 'KUBECONFIG')]) {
+                withCredentials([
+                    file(credentialsId: "${KUBECONFIG_CREDENTIAL_ID}", variable: 'KUBECONFIG'),
+                    aws(credentialsId: 'awscarsa', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
                     sh '''#!/bin/bash
                     set -e
                     
@@ -95,6 +98,10 @@ pipeline {
                     
                     # Verificar que kubectl está instalado
                     which ${KUBECTL}
+                    
+                    # Verificar las variables de entorno AWS (solo para debug, no muestra valores)
+                    echo "Variables AWS configuradas:"
+                    env | grep -i aws | cut -d= -f1
                     
                     # Crear un directorio temporal para el kubeconfig
                     TEMP_DIR=$(mktemp -d)
@@ -137,4 +144,5 @@ pipeline {
             echo 'Pipeline falló'
         }
     }
+}
 }
