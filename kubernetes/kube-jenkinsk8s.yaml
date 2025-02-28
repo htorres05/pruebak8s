@@ -31,16 +31,9 @@ spec:
               name: http
             - containerPort: 50000
               name: jnlp
-          volumeMounts:
-            - name: jenkins-home
-              mountPath: /var/jenkins_home
           env:
             - name: JAVA_OPTS
               value: "-Xmx1024m -Xms256m"
-      volumes:
-        - name: jenkins-home
-          persistentVolumeClaim:
-            claimName: jenkins-pvc
 ---
 apiVersion: v1
 kind: Service
@@ -58,14 +51,3 @@ spec:
     - name: jnlp
       port: 50000
       targetPort: 50000
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: jenkins-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
