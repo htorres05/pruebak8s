@@ -12,7 +12,7 @@ pipeline {
         IMAGE_TAG = 'v1.0'
         DOCKER_REGISTRY_CRED = credentials('harbor')
         // Entorno de Kubernetes
-        KUBECONFIG_CREDENTIAL_ID = 'kubeconfig'
+        KUBECONFIG_CREDENTIAL_ID = 'kubeconfig1'
         NAMESPACE = 'default'
     }
     stages {
