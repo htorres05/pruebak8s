@@ -19,13 +19,26 @@ pipeline {
         // Entorno de Kubernetes
         KUBECONFIG_CREDENTIAL_ID = 'kubeconfig1'
         NAMESPACE = 'default'
+        // Definir la ruta de kubectl
+        KUBECTL = '/usr/local/bin/kubectl'
     }
     stages {
-        stage('Install AWS CLI') {
+        stage('Install Dependencies') {
             steps {
                 sh '''
-                apk add --no-cache python3 py3-pip
+                # Instalar dependencias necesarias
+                apk add --no-cache python3 py3-pip curl bash
+
+                # Instalar AWS CLI
                 pip3 install awscli
+
+                # Instalar kubectl
+                curl -LO "https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl"
+                chmod +x kubectl
+                mv kubectl /usr/local/bin/
+                
+                # Verificar la instalación
+                /usr/local/bin/kubectl version --client
                 '''
             }
         }
@@ -60,21 +73,38 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL_ID}", variable: 'KUBECONFIG')]) {
-                    sh '''
+                    sh '''#!/bin/bash
+                    set -e
+                    
+                    # Verificar que el archivo existe
+                    ls -la ${DEPLOYMENT_FILE}
+                    
                     # Crear una copia del archivo de despliegue para modificarlo
                     cp ${DEPLOYMENT_FILE} deployment-temp.yaml
                     
-                    # Extraer el nombre del deployment del archivo
-                    DEPLOYMENT_NAME=$(grep -A1 "kind: Deployment" deployment-temp.yaml | grep "name:" | awk '{print $2}')
+                    # Verificar contenido del archivo
+                    echo "Contenido del archivo deployment-temp.yaml:"
+                    cat deployment-temp.yaml
+                    
+                    # Extraer el nombre del deployment del archivo - usar una forma más robusta
+                    DEPLOYMENT_NAME=$(grep -A2 "kind: Deployment" deployment-temp.yaml | grep "name:" | head -1 | awk '{print $2}')
+                    echo "Nombre del deployment: ${DEPLOYMENT_NAME}"
                     
                     # Reemplazar la imagen en el archivo
                     sed -i "s|image:.*|image: ${ECR_REPO}/${IMAGE_NAME}:${IMAGE_TAG}|g" deployment-temp.yaml
                     
-                    # Aplicar el archivo de despliegue
-                    kubectl --kubeconfig=$KUBECONFIG apply -f deployment-temp.yaml -n ${NAMESPACE}
+                    # Verificar que kubectl está instalado
+                    which ${KUBECTL} || echo "kubectl no está instalado o no está en la ruta"
                     
-                    # Esperar a que el despliegue se complete
-                    kubectl --kubeconfig=$KUBECONFIG -n ${NAMESPACE} rollout status deployment/${DEPLOYMENT_NAME}
+                    # Aplicar el archivo de despliegue
+                    ${KUBECTL} --kubeconfig=$KUBECONFIG apply -f deployment-temp.yaml -n ${NAMESPACE}
+                    
+                    # Si el deployment existe, esperar a que se complete
+                    if [ ! -z "${DEPLOYMENT_NAME}" ]; then
+                        ${KUBECTL} --kubeconfig=$KUBECONFIG -n ${NAMESPACE} rollout status deployment/${DEPLOYMENT_NAME}
+                    else
+                        echo "No se pudo extraer el nombre del deployment, no se esperará el rollout"
+                    fi
                     '''
                 }
             }
@@ -84,7 +114,20 @@ pipeline {
                 // Hacer logout de los registros por seguridad
                 sh 'docker logout $SOURCE_REPO'
                 sh 'docker logout $ECR_REPO'
+                // Limpieza de archivos temporales
+                sh 'rm -f deployment-temp.yaml || true'
             }
+        }
+    }
+    post {
+        always {
+            echo 'Pipeline completado - éxito o fallo'
+        }
+        success {
+            echo 'Pipeline completado exitosamente'
+        }
+        failure {
+            echo 'Pipeline falló'
         }
     }
 }
