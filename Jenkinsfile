@@ -7,8 +7,8 @@ pipeline {
     }
     parameters {
         string(name: 'DEPLOYMENT_FILE', defaultValue: 'kubernetes/kube-catalogo-landing.yaml', description: 'Ruta al archivo de despliegue Kubernetes dentro del repositorio')
-        #string(name: 'IMAGE_NAME', description: 'Nombre de la imagen')
-        #string(name: 'IMAGE_TAG', description: 'Tag de la imagen')
+        //string(name: 'IMAGE_NAME', description: 'Nombre de la imagen')
+        //string(name: 'IMAGE_TAG', description: 'Tag de la imagen')
     }
     environment {
         ECR_REPO = '318518286440.dkr.ecr.us-east-1.amazonaws.com'
