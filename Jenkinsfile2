@@ -1,8 +1,8 @@
 pipeline {
     agent {
         docker {
-            image 'amazon/aws-cli:latest' //Usamos la imagen oficial de aws cli
-            args '-v /var/run/docker.sock:/var/run/docker.sock --entrypoint=""' //Necesitamos exponer el docker sock.
+            image 'docker:20-dind'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
     environment {
@@ -12,6 +12,14 @@ pipeline {
         IMAGE_TAG = 'v1.0'
     }
     stages {
+        stage('Install AWS CLI') {
+            steps {
+                sh '''
+                apk add --no-cache python3 py3-pip
+                pip3 install awscli
+                '''
+            }
+        }
         stage('Login ECR') {
             steps {
                 withCredentials([aws(credentialsId: 'awscarsa')]) {
