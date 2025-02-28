@@ -7,8 +7,8 @@ pipeline {
     }
     parameters {
         string(name: 'DEPLOYMENT_FILE', defaultValue: 'kubernetes/kube-catalogo-landing.yaml', description: 'Ruta al archivo de despliegue Kubernetes dentro del repositorio')
-        //string(name: 'IMAGE_NAME', description: 'Nombre de la imagen')
-        //string(name: 'IMAGE_TAG', description: 'Tag de la imagen')
+        #string(name: 'IMAGE_NAME', description: 'Nombre de la imagen')
+        #string(name: 'IMAGE_TAG', description: 'Tag de la imagen')
     }
     environment {
         ECR_REPO = '318518286440.dkr.ecr.us-east-1.amazonaws.com'
@@ -94,17 +94,24 @@ pipeline {
                     sed -i "s|image:.*|image: ${ECR_REPO}/${IMAGE_NAME}:${IMAGE_TAG}|g" deployment-temp.yaml
                     
                     # Verificar que kubectl está instalado
-                    which ${KUBECTL} || echo "kubectl no está instalado o no está en la ruta"
+                    which ${KUBECTL}
                     
-                    # Aplicar el archivo de despliegue
-                    ${KUBECTL} --kubeconfig=$KUBECONFIG apply -f deployment-temp.yaml -n ${NAMESPACE}
+                    # Crear un directorio temporal para el kubeconfig
+                    TEMP_DIR=$(mktemp -d)
+                    cp "$KUBECONFIG" $TEMP_DIR/config
+                    
+                    # Aplicar el archivo de despliegue usando el kubeconfig en el directorio temporal
+                    KUBECONFIG=$TEMP_DIR/config ${KUBECTL} apply -f deployment-temp.yaml -n ${NAMESPACE}
                     
                     # Si el deployment existe, esperar a que se complete
                     if [ ! -z "${DEPLOYMENT_NAME}" ]; then
-                        ${KUBECTL} --kubeconfig=$KUBECONFIG -n ${NAMESPACE} rollout status deployment/${DEPLOYMENT_NAME}
+                        KUBECONFIG=$TEMP_DIR/config ${KUBECTL} rollout status deployment/${DEPLOYMENT_NAME} -n ${NAMESPACE}
                     else
                         echo "No se pudo extraer el nombre del deployment, no se esperará el rollout"
                     fi
+                    
+                    # Limpiar directorio temporal
+                    rm -rf $TEMP_DIR
                     '''
                 }
             }
