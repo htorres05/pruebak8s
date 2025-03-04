@@ -13,6 +13,7 @@ pipeline {
         //choice(name: 'SOURCE_REPO', choices: ['srvregistry01.caredmegatone.com', '318518286440.dkr.ecr.us-east-1.amazonaws.com'], description: 'Cluster Origen')
     }
     environment {
+        DEPLOYMENT_FILE_VALUE = "${.params.DEPLOYMENT_FILE}"
         ECR_REPO = '318518286440.dkr.ecr.us-east-1.amazonaws.com'
         SOURCE_REPO = 'srvregistry01.caredmegatone.com'
         // Las variables IMAGE_NAME e IMAGE_TAG ahora vienen de los parámetros
@@ -81,10 +82,10 @@ pipeline {
                     set -e
                     
                     # Verificar que el archivo existe
-                    ls -la ${DEPLOYMENT_FILE}
+                    ls -la ${DEPLOYMENT_FILE_VALUE}
                     
                     # Crear una copia del archivo de despliegue para modificarlo
-                    cp ${DEPLOYMENT_FILE} deployment-temp.yaml
+                    cp ${DEPLOYMENT_FILE_VALUE} deployment-temp.yaml
                     
                     # Verificar contenido del archivo
                     echo "Contenido del archivo deployment-temp.yaml:"
@@ -95,7 +96,7 @@ pipeline {
                     echo "Nombre del deployment: ${DEPLOYMENT_NAME}"
                     
                     # Reemplazar la imagen en el archivo
-                    sed -i "s|image: IMAGE_PLACEHOLDER|image: ${ECR_REPO}/${params.IMAGE_NAME}:${params.IMAGE_TAG}|g" deployment-temp.yaml
+                    sed -i "s|image: IMAGE_PLACEHOLDER |image: ${ECR_REPO}/${params.IMAGE_NAME}:${params.IMAGE_TAG}|g" deployment-temp.yaml
                     
                     # Verificar que kubectl está instalado
                     which ${KUBECTL}
