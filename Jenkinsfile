@@ -95,7 +95,7 @@ pipeline {
                     echo "Nombre del deployment: ${DEPLOYMENT_NAME}"
                     
                     # Reemplazar la imagen en el archivo
-                    sed -i "s|image:.*|image: ${ECR_REPO}/${params.IMAGE_NAME}:${params.IMAGE_TAG}|g" deployment-temp.yaml
+                    sed -i "s|image: IMAGE_PLACEHOLDER|image: ${ECR_REPO}/${params.IMAGE_NAME}:${params.IMAGE_TAG}|g" deployment-temp.yaml
                     
                     # Verificar que kubectl está instalado
                     which ${KUBECTL}
