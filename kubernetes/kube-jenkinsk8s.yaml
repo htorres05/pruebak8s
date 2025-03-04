@@ -18,7 +18,7 @@ spec:
         - name: registryaws
       containers:
         - name: jenkinsk8s
-          image: 318518286440.dkr.ecr.us-east-1.amazonaws.com/tecnologia/jenkinsk8s:v1.0
+          image: IMAGE_PLACEHOLDER
           resources:
             requests:
               memory: "1Gi"
