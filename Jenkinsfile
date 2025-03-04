@@ -7,14 +7,15 @@ pipeline {
     }
     parameters {
         string(name: 'DEPLOYMENT_FILE', defaultValue: 'kubernetes/kube-jenkinsk8s.yaml', description: 'Ruta al archivo de despliegue Kubernetes dentro del repositorio')
-        //string(name: 'IMAGE_NAME', description: 'Nombre de la imagen')
-        //string(name: 'IMAGE_TAG', description: 'Tag de la imagen')
+        string(name: 'IMAGE_NAME', defaultValue: 'tecnologia/jenkinsk8s', description: 'Nombre de la imagen')
+        string(name: 'IMAGE_TAG', defaultValue: 'v1.0', description: 'Tag de la imagen')
+        //choice(name: 'ECR_REPO', choices: ['318518286440.dkr.ecr.us-east-1.amazonaws.com','srvregistry01.caredmegatone.com'], description: 'Cluster destino')
+        //choice(name: 'SOURCE_REPO', choices: ['srvregistry01.caredmegatone.com', '318518286440.dkr.ecr.us-east-1.amazonaws.com'], description: 'Cluster Origen')
     }
     environment {
         ECR_REPO = '318518286440.dkr.ecr.us-east-1.amazonaws.com'
         SOURCE_REPO = 'srvregistry01.caredmegatone.com'
-        IMAGE_NAME = 'tecnologia/jenkinsk8s'
-        IMAGE_TAG = 'v1.0'
+        // Las variables IMAGE_NAME e IMAGE_TAG ahora vienen de los parámetros
         DOCKER_REGISTRY_CRED = credentials('harbor')
         // Entorno de Kubernetes
         KUBECONFIG_CREDENTIAL_ID = 'kubeconfig1'
@@ -57,17 +58,17 @@ pipeline {
         }
         stage('Pull Image') {
             steps {
-                sh "docker pull $SOURCE_REPO/$IMAGE_NAME:$IMAGE_TAG"
+                sh "docker pull $SOURCE_REPO/$params.IMAGE_NAME:$params.IMAGE_TAG"
             }
         }
         stage('Tag Image') {
             steps {
-                sh "docker tag $SOURCE_REPO/$IMAGE_NAME:$IMAGE_TAG $ECR_REPO/$IMAGE_NAME:$IMAGE_TAG"
+                sh "docker tag $SOURCE_REPO/$params.IMAGE_NAME:$params.IMAGE_TAG $ECR_REPO/$params.IMAGE_NAME:$params.IMAGE_TAG"
             }
         }
         stage('Push Image to ECR') {
             steps {
-                sh "docker push $ECR_REPO/$IMAGE_NAME:$IMAGE_TAG"
+                sh "docker push $ECR_REPO/$params.IMAGE_NAME:$params.IMAGE_TAG"
             }
         }
         stage('Deploy to Kubernetes') {
@@ -94,7 +95,7 @@ pipeline {
                     echo "Nombre del deployment: ${DEPLOYMENT_NAME}"
                     
                     # Reemplazar la imagen en el archivo
-                    sed -i "s|image:.*|image: ${ECR_REPO}/${IMAGE_NAME}:${IMAGE_TAG}|g" deployment-temp.yaml
+                    sed -i "s|image:.*|image: ${ECR_REPO}/${params.IMAGE_NAME}:${params.IMAGE_TAG}|g" deployment-temp.yaml
                     
                     # Verificar que kubectl está instalado
                     which ${KUBECTL}
