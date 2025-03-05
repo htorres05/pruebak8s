@@ -16,6 +16,9 @@ pipeline {
         DEPLOYMENT_FILE_VALUE = "${params.DEPLOYMENT_FILE}"
         ECR_REPO = '318518286440.dkr.ecr.us-east-1.amazonaws.com'
         SOURCE_REPO = 'srvregistry01.caredmegatone.com'
+        // Convertir los parámetros en variables de entorno para el script de shell
+        IMAGE_NAME_VALUE = "${params.IMAGE_NAME}"
+        IMAGE_TAG_VALUE = "${params.IMAGE_TAG}"
         // Las variables IMAGE_NAME e IMAGE_TAG ahora vienen de los parámetros
         DOCKER_REGISTRY_CRED = credentials('harbor')
         // Entorno de Kubernetes
