@@ -173,9 +173,23 @@ pipeline {
         }
         success {
             echo 'Pipeline completado exitosamente'
+            slackSend(
+                color: 'good',
+                message: "✅ ÉXITO: Pipeline ${env.JOB_NAME} completado con éxito - La imagen ${params.IMAGE_NAME}:${params.IMAGE_TAG} ha sido desplegada en ${env.NAMESPACE} - Build ${env.BUILD_NUMBER} - ${env.BUILD_URL}"
+            )
         }
         failure {
             echo 'Pipeline falló'
+            slackSend(
+                color: 'danger',
+                message: "❌ ERROR: Pipeline ${env.JOB_NAME} falló - Build ${env.BUILD_NUMBER} - ${env.BUILD_URL}"
+            )
+        }
+        unstable {
+            slackSend(
+                color: 'warning',
+                message: "⚠️ INESTABLE: Pipeline ${env.JOB_NAME} está inestable - Build ${env.BUILD_NUMBER} - ${env.BUILD_URL}"
+            )
         }
     }
 }
