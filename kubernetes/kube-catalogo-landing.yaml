@@ -25,7 +25,7 @@ spec:
         - name: registryaws
       containers:
         - name: catalogo-landing
-          image: 318518286440.dkr.ecr.us-east-1.amazonaws.com/produccion/catalogo-landing:v1.0.9
+          image: IMAGE_PLACEHOLDER
           resources:
             requests:
               memory: "256Mi"
