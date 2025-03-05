@@ -13,7 +13,7 @@ pipeline {
         //choice(name: 'SOURCE_REPO', choices: ['srvregistry01.caredmegatone.com', '318518286440.dkr.ecr.us-east-1.amazonaws.com'], description: 'Cluster Origen')
     }
     environment {
-        DEPLOYMENT_FILE_VALUE = "${.params.DEPLOYMENT_FILE}"
+        DEPLOYMENT_FILE_VALUE = "${params.DEPLOYMENT_FILE}"
         ECR_REPO = '318518286440.dkr.ecr.us-east-1.amazonaws.com'
         SOURCE_REPO = 'srvregistry01.caredmegatone.com'
         // Las variables IMAGE_NAME e IMAGE_TAG ahora vienen de los parámetros
