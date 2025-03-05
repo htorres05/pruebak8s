@@ -13,10 +13,10 @@ spec:
         app: vtol-manager-carsa
     spec:
       imagePullSecrets:
-      - name: 
+      - name: registryaws
       containers:
       - name: vtol-manager-carsa
-        image: 
+        image: IMAGE_PLACEHOLDER
         resources:
           requests:
             memory: "1024Mi"
