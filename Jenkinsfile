@@ -173,23 +173,42 @@ pipeline {
         }
         success {
             echo 'Pipeline completado exitosamente'
-            slackSend(
-                color: 'good',
-                message: "✅ ÉXITO: Pipeline ${env.JOB_NAME} completado con éxito - La imagen ${params.IMAGE_NAME}:${params.IMAGE_TAG} ha sido desplegada en ${env.NAMESPACE} - Build ${env.BUILD_NUMBER} - ${env.BUILD_URL}"
-            )
+            script {
+                def summary = """
+                *Despliegue exitoso* :white_check_mark:
+                *Pipeline:* ${env.JOB_NAME}
+                *Imagen:* ${params.IMAGE_NAME}:${params.IMAGE_TAG}
+                *Desplegada en:* ${env.NAMESPACE}
+                *Build:* #${env.BUILD_NUMBER}
+                *Detalles:* <${env.BUILD_URL}|Ver en Jenkins>
+                """
+                slackSend(color: 'good', message: summary)
+            }
         }
         failure {
             echo 'Pipeline falló'
-            slackSend(
-                color: 'danger',
-                message: "❌ ERROR: Pipeline ${env.JOB_NAME} falló - Build ${env.BUILD_NUMBER} - ${env.BUILD_URL}"
-            )
+            script {
+                def summary = """
+                *Despliegue fallido* :x:
+                *Pipeline:* ${env.JOB_NAME}
+                *Imagen:* ${params.IMAGE_NAME}:${params.IMAGE_TAG}
+                *Build:* #${env.BUILD_NUMBER}
+                *Detalles:* <${env.BUILD_URL}|Ver en Jenkins>
+                """
+                slackSend(color: 'danger', message: summary)
+            }
         }
         unstable {
-            slackSend(
-                color: 'warning',
-                message: "⚠️ INESTABLE: Pipeline ${env.JOB_NAME} está inestable - Build ${env.BUILD_NUMBER} - ${env.BUILD_URL}"
-            )
+            script {
+                def summary = """
+                *Despliegue inestable* :warning:
+                *Pipeline:* ${env.JOB_NAME}
+                *Imagen:* ${params.IMAGE_NAME}:${params.IMAGE_TAG}
+                *Build:* #${env.BUILD_NUMBER}
+                *Detalles:* <${env.BUILD_URL}|Ver en Jenkins>
+                """
+                slackSend(color: 'warning', message: summary)
+            }
         }
     }
 }
