@@ -6,7 +6,7 @@ pipeline {
         }
     }
     parameters {
-        choice(name: 'DEPLOYMENT_FILE', choices: ['kubernetes/kube-catalogo-landing.yaml', 'kubernetes/kube-eccomerce-landing.yaml' ]defaultValue: 'kubernetes/kube-jenkinsk8s.yaml', description: 'Ruta al archivo de despliegue Kubernetes dentro del repositorio')
+        choice(name: 'DEPLOYMENT_FILE', choices: ['kubernetes/kube-catalogo-landing.yaml', 'kubernetes/kube-ecommerce-ms.yaml', 'kubernetes/kube-jenkinsk8s.yaml'], description: 'Ruta al archivo de despliegue Kubernetes dentro del repositorio')
         string(name: 'IMAGE_NAME', defaultValue: 'tecnologia/jenkinsk8s', description: 'Nombre de la imagen')
         string(name: 'IMAGE_TAG', defaultValue: 'v1.0', description: 'Tag de la imagen')
         //choice(name: 'ECR_REPO', choices: ['318518286440.dkr.ecr.us-east-1.amazonaws.com','srvregistry01.caredmegatone.com'], description: 'Cluster destino')
