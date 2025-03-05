@@ -60,6 +60,34 @@ pipeline {
                 }
             }
         }
+        stage('Check and Create ECR Repository') {
+            steps {
+                withCredentials([aws(credentialsId: 'awscarsa')]) {
+                    sh '''
+                    # Extraer solo el nombre del repositorio (sin el tag)
+                    REPO_NAME=$IMAGE_NAME_VALUE
+                    
+                    echo "Verificando si existe el repositorio: $REPO_NAME en ECR..."
+                    
+                    # Verificar si el repositorio existe
+                    if ! aws ecr describe-repositories --region $ECR_REGION --repository-names $REPO_NAME 2>/dev/null; then
+                        echo "El repositorio $REPO_NAME no existe. Creándolo..."
+                        aws ecr create-repository --repository-name $REPO_NAME --region $ECR_REGION
+                        
+                        # Configurar política de lifecycle para evitar acumulación de imágenes
+                        aws ecr put-lifecycle-policy \
+                            --repository-name $REPO_NAME \
+                            --lifecycle-policy-text '{"rules":[{"rulePriority":1,"description":"Mantener solo las últimas 10 imágenes","selection":{"tagStatus":"any","countType":"imageCountMoreThan","countNumber":10},"action":{"type":"expire"}}]}' \
+                            --region $ECR_REGION
+                        
+                        echo "Repositorio $REPO_NAME creado exitosamente en ECR"
+                    else
+                        echo "El repositorio $REPO_NAME ya existe en ECR"
+                    fi
+                    '''
+                }
+            }
+        }
         stage('Pull Image') {
             steps {
                 sh "docker pull $SOURCE_REPO/$params.IMAGE_NAME:$params.IMAGE_TAG"
