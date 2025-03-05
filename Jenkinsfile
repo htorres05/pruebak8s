@@ -15,6 +15,7 @@ pipeline {
     environment {
         ECR_REPO = '318518286440.dkr.ecr.us-east-1.amazonaws.com'
         SOURCE_REPO = 'srvregistry01.caredmegatone.com'
+        ECR_REGION = 'us-east-1'
         // Convertir los parámetros en variables de entorno para el script de shell
         DEPLOYMENT_FILE_VALUE = "${params.DEPLOYMENT_FILE}"
         IMAGE_NAME_VALUE = "${params.IMAGE_NAME}"
