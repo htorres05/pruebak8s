@@ -25,7 +25,7 @@ spec:
       - name: registryaws
       containers:
       - name: ecommerce-ms
-        image: 318518286440.dkr.ecr.us-east-1.amazonaws.com/produccion/ecommerce-ms:v1.0.2
+        image: IMAGE_PLACEHOLDER
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: prd
