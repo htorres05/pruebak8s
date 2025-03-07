@@ -6,9 +6,9 @@ pipeline {
         }
     }
     parameters {
-        choice(name: 'DEPLOYMENT_FILE', choices: ['kubernetes/kube-catalogo-landing.yaml', 'kubernetes/kube-ecommerce-ms.yaml', 'kubernetes/kube-vtol-manager-carsa-prd.yaml', 'kubernetes/kube-jenkinsk8s.yaml', 'kubernetes/kube-concurso-promo-front-prd.yaml'], description: 'Ruta al archivo de despliegue Kubernetes dentro del repositorio')
-        string(name: 'IMAGE_NAME', defaultValue: 'tecnologia/jenkinsk8s', description: 'Nombre de la imagen')
-        string(name: 'IMAGE_TAG', defaultValue: 'v1.0', description: 'Tag de la imagen')
+        choice(name: 'DEPLOYMENT_FILE', choices: ['kubernetes/kube-jenkinsk8s.yaml', 'kubernetes/kube-catalogo-landing.yaml', 'kubernetes/kube-ecommerce-ms.yaml', 'kubernetes/kube-concurso-promo-front-prd.yaml', 'kube-concurso-back-prd.yaml'], description: 'Ruta y nombre del archivo kubefile dentro del repositorio. Formato: kubernetes/<archivo>')
+        string(name: 'IMAGE_NAME', description: 'Nombre de la imagen source')
+        string(name: 'IMAGE_TAG', description: 'Tag de la imagen - Formato: vx.x.x')
         //choice(name: 'ECR_REPO', choices: ['318518286440.dkr.ecr.us-east-1.amazonaws.com','srvregistry01.caredmegatone.com'], description: 'Cluster destino')
         //choice(name: 'SOURCE_REPO', choices: ['srvregistry01.caredmegatone.com', '318518286440.dkr.ecr.us-east-1.amazonaws.com'], description: 'Cluster Origen')
     }
