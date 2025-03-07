@@ -27,7 +27,7 @@ spec:
       - name: registryaws
       containers:
         - name: concurso-promo-front
-          image: 
+          image: IMAGE_PLACEHOLDER
           resources:
             requests:
               memory: "250Mi"
