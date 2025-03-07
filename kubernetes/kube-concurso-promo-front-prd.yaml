@@ -27,7 +27,7 @@ spec:
       - name: registryaws
       containers:
         - name: concurso-promo-front
-          image: 318518286440.dkr.ecr.us-east-1.amazonaws.com/produccion/concurso-promo-front:v1.0.43
+          image: 
           resources:
             requests:
               memory: "250Mi"
