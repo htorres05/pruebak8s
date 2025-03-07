@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: concurso-promo-back
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: concurso-promo-back
+  template:
+    metadata:
+      labels:
+        app: concurso-promo-back
+    spec:
+#      affinity:
+#        nodeAffinity:
+#          requiredDuringSchedulingIgnoredDuringExecution:
+#            nodeSelectorTerms:
+#              - matchExpressions:
+#                  - key: role
+#                    operator: In
+#                    values:
+#                      - front
+      imagePullSecrets:
+      - name: registryaws
+      containers:
+        - name: concurso-promo-back
+          image: 318518286440.dkr.ecr.us-east-1.amazonaws.com/produccion/concurso-promo-back:v1.0.14
+          resources:
+            requests:
+              memory: "256Mi"
+            limits:
+              memory: "512Mi"
+          ports:
+            - containerPort: 30391
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: concurso-promo-back-service
+spec:
+  type: NodePort
+  selector:
+    app: concurso-promo-back
+  ports:
+    - name: http
+      protocol: TCP
+      port: 30391
+      targetPort: 30391
+      nodePort: 30391
